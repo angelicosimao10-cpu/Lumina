@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Lumina · Jornada do Conhecimento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & VARIÁVEIS ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0b0f1a;
+            --bg-card: rgba(18, 26, 40, 0.75);
+            --border-card: rgba(255, 255, 255, 0.06);
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --primary-glow: rgba(124, 58, 237, 0.4);
+            --accent: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.3);
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.3);
+            --red: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.3);
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --radius: 20px;
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            --glass: rgba(18, 26, 40, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+
+        /* ===== FUNDO ANIMADO ===== */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+            animation: breathe 14s ease-in-out infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(0.98);
+            }
+        }
+
+        /* Partículas flutuantes */
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* ===== APP CONTAINER ===== */
+        .app {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 12px 12px 80px 12px;
+        }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 4px 12px 4px;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, #c084fc, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            -webkit-text-fill-color: initial;
+            animation: floatIcon 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes floatIcon {
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-6px) rotate(4deg);
+            }
+        }
+
+        .streak {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+            transition: var(--transition);
+        }
+
+        .streak:hover {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.25);
+        }
+
+        .streak .fire {
+            animation: flicker 0.8s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* ===== TELAS ===== */
+        .screen {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeSlide 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 48px rgba(124, 58, 237, 0.12);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        /* ===== ESTATÍSTICAS ===== */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .stats .xp {
+            color: #fbbf24;
+        }
+        .stats .lvl {
+            color: var(--primary-light);
+        }
+
+        .progress-wrap {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin-top: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #a78bfa, #f59e0b);
+            background-size: 200% 100%;
+            border-radius: 20px;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: shimmer 2.5s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ===== BOTÕES ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: #fff;
+            box-shadow: 0 4px 24px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 36px var(--primary-glow);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #0b0f1a;
+            box-shadow: 0 4px 24px var(--accent-glow);
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 36px var(--accent-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-danger {
+            border-color: var(--red) !important;
+            color: var(--red) !important;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-sm {
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            width: auto;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* ===== INPUTS ===== */
+        .input-group {
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .input-group .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-group input:focus+.input-icon,
+        .input-group input:focus~.input-icon {
+            opacity: 1;
+            color: var(--primary-light);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .auth-msg {
+            font-size: 0.8rem;
+            margin-top: 6px;
+            min-height: 20px;
+            color: var(--red);
+            text-align: center;
+        }
+
+        /* ===== ILUSTRAÇÃO ANIMADA (SVG) ===== */
+        .auth-illustration {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px 0;
+        }
+
+        .auth-illustration svg {
+            max-width: 180px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 8px 24px rgba(124, 58, 237, 0.3));
+            animation: floatIllustration 4s ease-in-out infinite;
+        }
+
+        @keyframes floatIllustration {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .auth-illustration svg .book {
+            animation: bookGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes bookGlow {
+            0% {
+                fill: #7c3aed;
+                opacity: 0.8;
+            }
+            100% {
+                fill: #a78bfa;
+                opacity: 1;
+            }
+        }
+
+        .auth-illustration svg .sparkle {
+            animation: sparkle 1.8s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .auth-illustration svg .star {
+            animation: starPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes starPulse {
+            0% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* ===== OPÇÕES DO QUIZ ===== */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .option {
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .option:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateX(4px);
+        }
+
+        .option .letter {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .option.correct {
+            background: rgba(16, 185, 129, 0.2) !important;
+            border-color: var(--green) !important;
+            box-shadow: 0 0 20px var(--green-glow);
+        }
+
+        .option.correct .letter {
+            background: var(--green);
+            color: #fff;
+        }
+
+        .option.wrong {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: var(--red) !important;
+            box-shadow: 0 0 20px var(--red-glow);
+        }
+
+        .option.wrong .letter {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* ===== NAVEGAÇÃO INFERIOR ===== */
+        nav {
+            position: fixed;
+            bottom: 76px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 380px;
+            display: flex;
+            justify-content: space-around;
+            background: rgba(18, 26, 40, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 6px 8px;
+            z-index: 50;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 10px 16px;
+            border-radius: 20px;
+            transition: all var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+        }
+
+        nav button .nav-icon {
+            font-size: 1.4rem;
+        }
+
+        nav button.active-tab {
+            color: var(--primary-light);
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        nav button:hover {
+            color: #fff;
+        }
+
+        /* ===== GAME HEADER ===== */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 12px;
+        }
+
+        .game-header .lives {
+            color: var(--red);
+        }
+
+        /* ===== TOAST DE LEVEL UP ===== */
+        .level-up-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(11, 15, 26, 0.95);
+            border: 2px solid var(--accent);
+            border-radius: 28px;
+            padding: 36px 40px;
+            text-align: center;
+            z-index: 200;
+            pointer-events: none;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 24px 64px rgba(245, 158, 11, 0.3);
+            backdrop-filter: blur(8px);
+        }
+
+        .level-up-toast.show {
+            transform: translate(-50%, -50%) scale(1);
+            animation: toastPop 2.2s ease forwards;
+        }
+
+        @keyframes toastPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+            30% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .level-up-toast h2 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .level-up-toast .sub {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== FLOATING XP ===== */
+        .xp-float {
+            position: fixed;
+            pointer-events: none;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #fbbf24;
+            z-index: 100;
+            animation: xpFly 1.2s ease-out forwards;
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.7);
+        }
+
+        @keyframes xpFly {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.5);
+            }
+            40% {
+                opacity: 1;
+                transform: translateY(-40px) scale(1.3);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-90px) scale(0.8);
+            }
+        }
+
+        /* ===== CONFETES ===== */
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            animation: confettiFall 1s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(140px) rotate(720deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* ===== CONTAINER DO BANNER ===== */
+        .ad-banner {
+            position: fixed;
+            bottom: 76px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            z-index: 40;
+            padding: 4px 0;
+            pointer-events: none;
+            height: 60px;
+        }
+
+        .ad-banner.active {
+            pointer-events: auto;
+        }
+
+        .ad-banner .ad-view {
+            width: 100%;
+            max-width: 320px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+
+        .ad-banner .ad-view.placeholder {
+            background: rgba(255, 255, 255, 0.06);
+            border-style: dashed;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 480px) {
+            .app {
+                padding: 8px 8px 80px 8px;
+            }
+            .card {
+                padding: 18px;
+            }
+            .logo {
+                font-size: 1.3rem;
+            }
+            .streak {
+                font-size: 0.65rem;
+                padding: 4px 10px;
+            }
+            nav button {
+                font-size: 0.6rem;
+                padding: 8px 10px;
+            }
+            nav button .nav-icon {
+                font-size: 1.2rem;
+            }
+            .auth-illustration svg {
+                max-width: 140px;
+            }
+            .ad-banner {
+                max-width: 340px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fundo -->
+    <div class="bg-glow"></div>
+    <!-- Partículas (geradas via JS) -->
+
+    <!-- Toast Level Up -->
+    <div class="level-up-toast" id="levelToast">
+        <h2>🎉 Nível <span id="newLevel">2</span>!</h2>
+        <p class="sub">Continue assim, você é incrível!</p>
+    </div>
+
+    <!-- App -->
+    <div class="app">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+            <div class="logo">
+                <span class="logo-icon">💡</span>
+                <span>Lumina</span>
+            </div>
+            <div class="streak" id="streakBadge">
+                <span class="fire">🔥</span>
+                <span id="streakDays">3</span> dias
+            </div>
+        </div>
+
+        <!-- TELA DE AUTENTICAÇÃO -->
+        <div id="auth" class="screen active">
+            <div class="card" style="padding: 24px 20px;">
+                <!-- Ilustração animada -->
+                <div class="auth-illustration">
+                    <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="translate(20, 20)">
+                            <path d="M10 100 L10 30 L80 30 L80 100 L45 80 L10 100Z" fill="#7c3aed" opacity="0.9" class="book"/>
+                            <path d="M90 100 L90 30 L160 30 L160 100 L125 80 L90 100Z" fill="#a78bfa" opacity="0.9" class="book"/>
+                            <path d="M10 30 L80 30 L80 100 L45 80 L10 30Z" fill="none" stroke="#c084fc" stroke-width="2"/>
+                            <path d="M90 30 L160 30 L160 100 L125 80 L90 30Z" fill="none" stroke="#c084fc" stroke-width="2"/>
+                            <path d="M45 80 L80 100 L80 30 L45 80Z" fill="#e2e8f0" opacity="0.15"/>
+                            <path d="M125 80 L160 100 L160 30 L125 80Z" fill="#e2e8f0" opacity="0.15"/>
+                            <circle cx="80" cy="30" r="6" fill="#fbbf24" class="sparkle" style="animation-delay:0.2s"/>
+                            <circle cx="100" cy="40" r="4" fill="#fbbf24" class="sparkle" style="animation-delay:0.8s"/>
+                            <circle cx="60" cy="50" r="3" fill="#fbbf24" class="sparkle" style="animation-delay:1.4s"/>
+                            <path d="M130 10 L133 18 L142 18 L135 24 L138 32 L130 28 L122 32 L125 24 L118 18 L127 18Z" fill="#f59e0b" class="star" style="animation-delay:0.5s"/>
+                            <path d="M30 10 L33 16 L40 16 L35 20 L37 26 L30 22 L23 26 L25 20 L20 16 L27 16Z" fill="#f59e0b" class="star" style="animation-delay:1s"/>
+                        </g>
+                        <circle cx="170" cy="30" r="8" stroke="#a78bfa" stroke-width="1.5" opacity="0.4" class="sparkle" style="animation-delay:0.3s"/>
+                        <circle cx="20" cy="140" r="6" stroke="#c084fc" stroke-width="1.5" opacity="0.3" class="sparkle" style="animation-delay:0.9s"/>
+                        <circle cx="180" cy="130" r="5" stroke="#f59e0b" stroke-width="1.5" opacity="0.3" class="sparkle" style="animation-delay:1.6s"/>
+                    </svg>
+                </div>
+
+                <h3 class="card-title" id="authTitle" style="text-align:center;">🔐 Entrar no Lumina</h3>
+                <p class="card-sub" id="authSub" style="text-align:center;">Continue sua jornada de conhecimento</p>
+
+                <div class="input-group">
+                    <label>Usuário</label>
+                    <input id="authUser" placeholder="Seu nome de usuário" />
+                    <span class="input-icon">👤</span>
+                </div>
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input id="authPass" type="password" placeholder="Sua senha" />
+                    <span class="input-icon">🔒</span>
+                </div>
+
+                <button class="btn btn-accent btn-block" id="authBtn" onclick="handleAuth()">Entrar</button>
+                <button class="btn btn-outline btn-sm btn-block" id="toggleAuth" onclick="toggleAuthMode()" style="margin-top:8px;">Não tem conta? Cadastre-se</button>
+                <div class="auth-msg" id="authMsg"></div>
+            </div>
+        </div>
+
+        <!-- TELA HOME -->
+        <div id="home" class="screen">
+            <div class="card">
+                <h2 class="card-title">🌟 Olá, <span id="displayUser"></span>!</h2>
+                <div class="stats">
+                    <span>⭐ XP: <strong class="xp" id="xp">0</strong></span>
+                    <span>🏆 Nível: <strong class="lvl" id="level">1</strong></span>
+                </div>
+                <div class="progress-wrap">
+                    <div class="progress-fill" id="fill" style="width:0%;"></div>
+                </div>
+                <p class="card-sub" style="margin-top:4px;">Próximo nível: <span id="xpToNext">50</span> XP</p>
+                <button class="btn btn-accent btn-block" onclick="go('play')">▶ Iniciar Missão</button>
+            </div>
+        </div>
+
+        <!-- TELA PLAY -->
+        <div id="play" class="screen">
+            <div class="card">
+                <h3 class="card-title">🗺 Escolha seu Mundo</h3>
+                <button class="btn btn-primary btn-block" onclick="start('math')">➗ Reino da Matemática</button>
+                <button class="btn btn-primary btn-block" onclick="start('eng')">🇬🇧 Torre do Inglês</button>
+                <button class="btn btn-primary btn-block" onclick="start('pt')">📖 Biblioteca do Português</button>
+            </div>
+            <div class="card">
+                <h3 class="card-title">🔥 Missão Diária</h3>
+                <p>Progresso: <strong id="dailyProgress">0</strong>/10</p>
+                <div class="progress-wrap">
+                    <div class="progress-fill" id="dailyFill" style="width:0%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA GAME -->
+        <div id="game" class="screen">
+            <div class="card">
+                <div class="game-header">
+                    <span>⭐ XP <strong class="xp" id="gx">0</strong></span>
+                    <span class="lives">❤️ <span id="life">3</span></span>
+                    <span>📝 <span id="qNum">1</span>/10</span>
+                </div>
+                <h3 id="q" style="font-weight:600; font-size:1.1rem; margin-bottom:4px;">Carregando...</h3>
+                <div class="options" id="opts"></div>
+            </div>
+            <button class="btn btn-outline btn-block" onclick="quitGame()">🚪 Sair da Missão</button>
+        </div>
+
+        <!-- TELA SETTINGS -->
+        <div id="settings" class="screen">
+            <div class="card">
+                <h3 class="card-title">⚙ Configurações</h3>
+                <p class="card-sub">Personalize sua experiência</p>
+                <button class="btn btn-outline btn-sm btn-block" onclick="perm()" style="margin-bottom:8px;">🔔 Ativar Notificações</button>
+                <button class="btn btn-outline btn-sm btn-block" onclick="connect()" style="margin-bottom:8px;">🌐 Sincronizar com Firebase</button>
+                <button class="btn btn-outline btn-sm btn-block btn-danger" onclick="logout()">🚪 Sair da conta</button>
+            </div>
+        </div>
+
+        <!-- NAVEGAÇÃO -->
+        <nav>
+            <button onclick="go('home')" class="active-tab" id="navHome">
+                <span class="nav-icon">🏠</span> Início
+            </button>
+            <button onclick="go('play')" id="navPlay">
+                <span class="nav-icon">🎮</span> Jogar
+            </button>
+            <button onclick="go('settings')" id="navSettings">
+                <span class="nav-icon">⚙</span> Ajustes
+            </button>
+        </nav>
+
+        <!-- CONTAINER DO BANNER (AdMob) -->
+        <div class="ad-banner" id="adBanner">
+            <div class="ad-view" id="adView">📢 Anúncio (simulação)</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  AUDIO ENGINE (Web Audio)
+        // ============================================================
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playTone(freq, type, duration, vol = 0.08, glide = 0) {
+            if (!audioCtx) return;
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, t);
+            if (glide) osc.frequency.linearRampToValueAtTime(freq + glide, t + duration);
+            gain.gain.setValueAtTime(vol, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + duration);
+        }
+
+        function sfxCorrect() {
+            playTone(600, 'sine', 0.15, 0.1);
+            setTimeout(() => playTone(900, 'sine', 0.18, 0.1), 100);
+        }
+
+        function sfxWrong() {
+            playTone(200, 'triangle', 0.3, 0.08);
+            setTimeout(() => playTone(150, 'sawtooth', 0.25, 0.06), 50);
+        }
+
+        function sfxLevelUp() {
+            [400, 600, 800, 1000].forEach((f, i) => {
+                setTimeout(() => playTone(f, 'sine', 0.15, 0.08 + i * 0.02), i * 80);
+            });
+        }
+
+        function sfxClick() {
+            playTone(800, 'sine', 0.06, 0.03);
+        }
+
+        // ============================================================
+        //  CONTROLE DE ANÚNCIOS (bridge para nativo + simulação)
+        // ============================================================
+        // IDs do AdMob fornecidos:
+        // App ID: ca-app-pub-2853656654144699~5628467861
+        // Banner Unit ID: ca-app-pub-2853656654144699/4482907154
+
+        function showBanner() {
+            // Se estiver no ambiente nativo (Cordova/Capacitor)
+            if (window.AdMob) {
+                window.AdMob.banner.show({
+                    id: 'ca-app-pub-2853656654144699/4482907154',
+                    position: window.AdMob.AD_POSITION.BOTTOM_CENTER,
+                    size: window.AdMob.AD_SIZE.BANNER
+                });
+            } else {
+                // Modo web: exibe um placeholder visual
+                const banner = document.getElementById('adBanner');
+                const view = document.getElementById('adView');
+                banner.classList.add('active');
+                view.classList.add('placeholder');
+                view.innerText = '📢 Anúncio (simulação)';
+                console.log('📢 Banner simulado (AdMob não disponível)');
+            }
+        }
+
+        function showInterstitial() {
+            if (window.AdMob) {
+                window.AdMob.interstitial.show({
+                    id: 'ca-app-pub-2853656654144699/4482907154' // pode usar o mesmo ou outro ID
+                });
+            } else {
+                // Modo web: simula com um alert ou notificação
+                console.log('📢 Intersticial simulado');
+                // Exibe um pequeno modal estilizado (opcional)
+                const banner = document.getElementById('adBanner');
+                const view = document.getElementById('adView');
+                const originalText = view.innerText;
+                view.innerText = '🌟 Anúncio intersticial (simulação)';
+                view.style.background = 'rgba(245,158,11,0.2)';
+                view.style.borderColor = '#f59e0b';
+                setTimeout(() => {
+                    view.innerText = originalText;
+                    view.style.background = '';
+                    view.style.borderColor = '';
+                }, 2000);
+                // ou alert('🌟 Anúncio intersticial (simulação)');
+            }
+        }
+
+        // Inicialização dos anúncios quando o dispositivo estiver pronto
+        function initAdMob() {
+            if (window.AdMob) {
+                // Configura o banner
+                window.AdMob.banner.config({
+                    id: 'ca-app-pub-2853656654144699/4482907154',
+                    autoShow: false
+                });
+                // Configura o intersticial
+                window.AdMob.interstitial.config({
+                    id: 'ca-app-pub-2853656654144699/4482907154',
+                    autoShow: false
+                });
+                // Carrega os anúncios
+                window.AdMob.banner.load();
+                window.AdMob.interstitial.load();
+                console.log('✅ AdMob inicializado');
+            } else {
+                console.log('⚠️ AdMob não disponível (modo web)');
+            }
+            // Mostra o banner após 2 segundos
+            setTimeout(showBanner, 2000);
+        }
+
+        // Escuta o evento de device ready (Cordova) ou DOMContentLoaded (web)
+        document.addEventListener('deviceready', initAdMob, false);
+        // Fallback para navegador comum
+        if (!window.cordova) {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Aguarda um pouco para dar tempo de carregar
+                setTimeout(initAdMob, 1000);
+            });
+        }
+
+        // ============================================================
+        //  STATE
+        // ============================================================
+        let xp = 0,
+            level = 1,
+            life = 3,
+            current = '',
+            questionIndex = 0,
+            totalAnswered = 0,
+            dailyCount = 0,
+            streakDays = 3;
+        const MAX_QUESTIONS = 10;
+        let authMode = 'login';
+        let currentUser = null;
+
+        // ============================================================
+        //  BANCO DE DADOS DE PERGUNTAS
+        // ============================================================
+        const db = {
+            math: [
+                { q: "2 + 2 = ?", o: ["3", "4", "5", "6"], a: 1 },
+                { q: "5 × 3 = ?", o: ["10", "12", "15", "18"], a: 2 },
+                { q: "Raiz quadrada de 49?", o: ["6", "7", "8", "9"], a: 1 },
+                { q: "100 ÷ 4 = ?", o: ["20", "25", "30", "35"], a: 1 },
+                { q: "Dobro de 18?", o: ["32", "34", "36", "38"], a: 2 },
+                { q: "3³ = ?", o: ["9", "18", "27", "36"], a: 2 },
+                { q: "15% de 200 = ?", o: ["20", "25", "30", "35"], a: 2 },
+                { q: "12 × 12 = ?", o: ["120", "132", "144", "156"], a: 2 },
+                { q: "MDC de 24 e 36?", o: ["6", "8", "12", "18"], a: 2 },
+                { q: "7! (fatorial) = ?", o: ["720", "5040", "40320", "362880"], a: 1 }
+            ],
+            eng: [
+                { q: "Apple = ?", o: ["Carro", "Maçã", "Casa", "Cachorro"], a: 1 },
+                { q: "Good morning:", o: ["Boa noite", "Boa tarde", "Bom dia", "Bom almoço"], a: 2 },
+                { q: "She ____ doctor.", o: ["am", "is", "are", "be"], a: 1 },
+                { q: "Oposto de hot?", o: ["Warm", "Cold", "Cool", "Dry"], a: 1 },
+                { q: "They ____ books.", o: ["read", "reads", "reading", "readed"], a: 0 },
+                { q: "Thank you:", o: ["Desculpa", "Por favor", "Obrigado", "Sinto muito"], a: 2 },
+                { q: "Plural de child?", o: ["Childs", "Children", "Childes", "Childrens"], a: 1 },
+                { q: "I ____ to school.", o: ["go", "goes", "going", "gone"], a: 0 },
+                { q: "Beautiful:", o: ["Feio", "Bonito", "Alto", "Baixo"], a: 1 },
+                { q: "We ____ happy.", o: ["am", "is", "are", "be"], a: 2 }
+            ],
+            pt: [
+                { q: "Verbo indica:", o: ["Nome", "Ação", "Lugar", "Cor"], a: 1 },
+                { q: "Antônimo de claro?", o: ["Brilhante", "Escuro", "Luz", "Dia"], a: 1 },
+                { q: "Ela ____ feliz.", o: ["estar", "está", "estava", "esteve"], a: 1 },
+                { q: "Substantivo é:", o: ["Ação", "Qualidade", "Nome", "Tempo"], a: 2 },
+                { q: "Plural de cidadão?", o: ["Cidadãos", "Cidadões", "Cidadães", "Cidadãs"], a: 0 },
+                { q: "Nós ____ cinema.", o: ["vai", "vamos", "vão", "irei"], a: 1 },
+                { q: "Sinônimo de alegre:", o: ["Triste", "Contente", "Raivoso", "Cansado"], a: 1 },
+                { q: "Advérbio modifica:", o: ["Substantivo", "Verbo", "Artigo", "Numeral"], a: 1 },
+                { q: "Tu ____ bem.", o: ["canta", "cantas", "cantam", "cantar"], a: 1 },
+                { q: "Coletivo de peixes?", o: ["Cardume", "Enxame", "Matilha", "Rebanho"], a: 0 }
+            ]
+        };
+
+        // ============================================================
+        //  AUTENTICAÇÃO (localStorage)
+        // ============================================================
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('lumina_users') || '{}');
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('lumina_users', JSON.stringify(users));
+        }
+
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem('lumina_current_user'));
+        }
+
+        function handleAuth() {
+            initAudio();
+            sfxClick();
+            const user = document.getElementById('authUser').value.trim();
+            const pass = document.getElementById('authPass').value.trim();
+            const msg = document.getElementById('authMsg');
+            if (!user || !pass) { msg.innerText = 'Preencha todos os campos.'; return; }
+            const users = getUsers();
+            if (authMode === 'register') {
+                if (users[user]) { msg.innerText = 'Usuário já existe.'; return; }
+                users[user] = { password: pass, xp: 0, level: 1, daily: 0, streak: 1 };
+                saveUsers(users);
+                loginUser(user, users[user]);
+            } else {
+                if (!users[user] || users[user].password !== pass) {
+                    msg.innerText = 'Credenciais inválidas.';
+                    return;
+                }
+                loginUser(user, users[user]);
+            }
+        }
+
+        function loginUser(user, data) {
+            currentUser = user;
+            localStorage.setItem('lumina_current_user', JSON.stringify({ name: user, ...data }));
+            xp = data.xp || 0;
+            level = data.level || 1;
+            dailyCount = data.daily || 0;
+            streakDays = data.streak || 1;
+            document.getElementById('displayUser').innerText = user;
+            updateUI();
+            go('home');
+            document.getElementById('authMsg').innerText = '';
+            document.getElementById('authUser').value = '';
+            document.getElementById('authPass').value = '';
+        }
+
+        function logout() {
+            if (currentUser) saveProgressToStorage();
+            localStorage.removeItem('lumina_current_user');
+            currentUser = null;
+            xp = 0;
+            level = 1;
+            dailyCount = 0;
+            go('auth');
+        }
+
+        function saveProgressToStorage() {
+            if (!currentUser) return;
+            const users = getUsers();
+            if (users[currentUser]) {
+                users[currentUser].xp = xp;
+                users[currentUser].level = level;
+                users[currentUser].daily = dailyCount;
+                users[currentUser].streak = streakDays;
+                saveUsers(users);
+            }
+        }
+
+        function toggleAuthMode() {
+            initAudio();
+            sfxClick();
+            authMode = authMode === 'login' ? 'register' : 'login';
+            document.getElementById('authTitle').innerText = authMode === 'login' ? '🔐 Entrar no Lumina' : '✨ Criar conta';
+            document.getElementById('authSub').innerText = authMode === 'login' ? 'Continue sua jornada' :
+                'Comece uma nova aventura';
+            document.getElementById('authBtn').innerText = authMode === 'login' ? 'Entrar' : 'Cadastrar';
+            document.getElementById('toggleAuth').innerText = authMode === 'login' ? 'Não tem conta? Cadastre-se' :
+                'Já tem conta? Entrar';
+            document.getElementById('authMsg').innerText = '';
+        }
+
+        // ============================================================
+        //  NAVEGAÇÃO
+        // ============================================================
+        function go(id) {
+            if (!currentUser && id !== 'auth') { go('auth'); return; }
+            if (currentUser && id === 'auth') { go('home'); return; }
+            document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+            document.getElementById(id).classList.add("active");
+            document.querySelectorAll("nav button").forEach(b => b.classList.remove("active-tab"));
+            const map = { home: 'navHome', play: 'navPlay', settings: 'navSettings' };
+            if (map[id]) document.getElementById(map[id]).classList.add("active-tab");
+            if (id === 'play' || id === 'home') updateUI();
+        }
+
+        // ============================================================
+        //  UI UPDATE
+        // ============================================================
+        function updateUI() {
+            document.getElementById('xp').innerText = xp;
+            document.getElementById('level').innerText = level;
+            document.getElementById('gx').innerText = xp;
+            document.getElementById('streakDays').innerText = streakDays;
+            const next = (level) * 50 - xp;
+            document.getElementById('xpToNext').innerText = next > 0 ? next : 0;
+            const pct = Math.min((xp % 50) / 50 * 100, 100);
+            document.getElementById('fill').style.width = pct + '%';
+            document.getElementById('dailyProgress').innerText = dailyCount;
+            document.getElementById('dailyFill').style.width = Math.min((dailyCount / 10) * 100, 100) + '%';
+        }
+
+        // ============================================================
+        //  JOGO
+        // ============================================================
+        function start(subject) {
+            initAudio();
+            sfxClick();
+            if (!currentUser) { go('auth'); return; }
+            current = subject;
+            questionIndex = 0;
+            life = 3;
+            totalAnswered = 0;
+            go('game');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const questions = db[current];
+            const q = questions[questionIndex % questions.length];
+            document.getElementById('q').innerText = q.q;
+            document.getElementById('gx').innerText = xp;
+            document.getElementById('life').innerText = life;
+            document.getElementById('qNum').innerText = Math.min(totalAnswered + 1, MAX_QUESTIONS);
+            const opts = document.getElementById('opts');
+            opts.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            q.o.forEach((o, i) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.innerHTML = `<span class="letter">${letters[i]}</span><span>${o}</span>`;
+                div.onclick = () => checkAnswer(i, q.a, div);
+                opts.appendChild(div);
+            });
+        }
+
+        function checkAnswer(sel, correct, el) {
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(o => o.classList.add('disabled'));
+            if (sel === correct) {
+                el.classList.add('correct');
+                sfxCorrect();
+                xp += 10;
+                totalAnswered++;
+                dailyCount++;
+                questionIndex++;
+                spawnXPFloat(el);
+                spawnConfetti(el);
+                const newLevel = Math.floor(xp / 50) + 1;
+                if (newLevel > level) {
+                    level = newLevel;
+                    sfxLevelUp();
+                    showLevelUp(level);
+                    // 📢 Exibe intersticial ao subir de nível
+                    showInterstitial();
+                }
+                updateUI();
+                saveProgressToStorage();
+                if (totalAnswered >= MAX_QUESTIONS) {
+                    setTimeout(() => {
+                        alert('🎉 Missão concluída! Você é incrível!');
+                        // 📢 Exibe intersticial ao concluir a missão
+                        showInterstitial();
+                        go('play');
+                    }, 600);
+                    return;
+                }
+                setTimeout(() => loadQuestion(), 500);
+            } else {
+                el.classList.add('wrong');
+                sfxWrong();
+                life--;
+                document.getElementById('life').innerText = life;
+                if (life <= 0) {
+                    setTimeout(() => {
+                        alert('💔 Suas vidas acabaram! Tente novamente.');
+                        go('play');
+                    }, 600);
+                } else {
+                    setTimeout(() => {
+                        loadQuestion();
+                    }, 700);
+                }
+            }
+        }
+
+        function quitGame() {
+            if (confirm('Deseja sair da missão? Seu progresso será perdido.')) {
+                go('play');
+            }
+        }
+
+        // ============================================================
+        //  EFEITOS VISUAIS
+        // ============================================================
+        function spawnXPFloat(el) {
+            const rect = el.getBoundingClientRect();
+            const x = rect.left + rect.width / 2 - 20;
+            const y = rect.top - 10;
+            const div = document.createElement('div');
+            div.className = 'xp-float';
+            div.innerText = '+10 XP';
+            div.style.left = x + 'px';
+            div.style.top = y + 'px';
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 1200);
+        }
+
+        function spawnConfetti(el) {
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const colors = ['#f59e0b', '#7c3aed', '#10b981', '#ef4444', '#3b82f6', '#ec4899'];
+            for (let i = 0; i < 20; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                const size = 6 + Math.random() * 8;
+                piece.style.width = size + 'px';
+                piece.style.height = size + 'px';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.left = (cx + (Math.random() - 0.5) * 80) + 'px';
+                piece.style.top = (cy + (Math.random() - 0.5) * 40) + 'px';
+                piece.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                document.body.appendChild(piece);
+                setTimeout(() => piece.remove(), 1500);
+            }
+        }
+
+        function showLevelUp(lvl) {
+            const toast = document.getElementById('levelToast');
+            document.getElementById('newLevel').innerText = lvl;
+            toast.classList.remove('show');
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2400);
+        }
+
+        // ============================================================
+        //  PARTÍCULAS DE FUNDO
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 25; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (6 + Math.random() * 10) + 's';
+                p.style.animationDelay = (Math.random() * 12) + 's';
+                p.style.width = (2 + Math.random() * 4) + 'px';
+                p.style.height = p.style.width;
+                p.style.background = `hsl(${260 + Math.random() * 60}, 80%, 70%)`;
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+
+        // ============================================================
+        //  FUNÇÕES DE SETTINGS
+        // ============================================================
+        function perm() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(p => {
+                    if (p === 'granted') new Notification('🔔 Lumina', { body: 'Notificações ativadas!' });
+                });
+            } else {
+                alert('Notificações já estão ' + (Notification.permission === 'granted' ? 'ativadas' : 'bloqueadas'));
+            }
+        }
+
+        function connect() {
+            alert('🌐 Conectando ao Firebase (simulação)');
+        }
+
+        // ============================================================
+        //  INICIALIZAÇÃO
+        // ============================================================
+        (function init() {
+            const saved = getCurrentUser();
+            if (saved) {
+                currentUser = saved.name;
+                xp = saved.xp || 0;
+                level = saved.level || 1;
+                dailyCount = saved.daily || 0;
+                streakDays = saved.streak || 1;
+                document.getElementById('displayUser').innerText = currentUser;
+                updateUI();
+                go('home');
+            } else {
+                go('auth');
+            }
+        })();
+
+        document.getElementById('levelToast').addEventListener('click', function() {
+            this.classList.remove('show');
+        });
+    </script>
+</body>
+</html>
